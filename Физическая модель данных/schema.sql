@@ -1,171 +1,195 @@
 -- DROP SCHEMA public;
 
 CREATE SCHEMA public AUTHORIZATION pg_database_owner;
--- public.виды_спорта definition
+-- public."Moderator" definition
 
 -- Drop table
 
--- DROP TABLE public.виды_спорта;
+-- DROP TABLE public."Moderator";
 
-CREATE TABLE public.виды_спорта (
-	"Вид спорта" varchar NOT NULL,
-	"IDвид_спорта" int4 NOT NULL,
-	CONSTRAINT виды_спорта_pk PRIMARY KEY ("IDвид_спорта")
+CREATE TABLE public."Moderator" (
+	"IDmoderator" int4 NOT NULL,
+	"Full_Name" varchar NULL,
+	CONSTRAINT moderator_pk PRIMARY KEY ("IDmoderator")
 );
 
 -- Permissions
 
-ALTER TABLE public.виды_спорта OWNER TO postgres;
-GRANT ALL ON TABLE public.виды_спорта TO postgres;
+ALTER TABLE public."Moderator" OWNER TO postgres;
+GRANT ALL ON TABLE public."Moderator" TO postgres;
 
 
--- public.виды_спорта_участников definition
+-- public."Processing_Status" definition
 
 -- Drop table
 
--- DROP TABLE public.виды_спорта_участников;
+-- DROP TABLE public."Processing_Status";
 
-CREATE TABLE public.виды_спорта_участников (
-	"IDучастник" int4 NOT NULL,
-	"IDвид_спорта" int4 NOT NULL
+CREATE TABLE public."Processing_Status" (
+	"IDstatus" int4 NOT NULL DEFAULT '-1'::integer,
+	description varchar NULL,
+	CONSTRAINT processing_status_pk PRIMARY KEY ("IDstatus")
 );
 
 -- Permissions
 
-ALTER TABLE public.виды_спорта_участников OWNER TO postgres;
-GRANT ALL ON TABLE public.виды_спорта_участников TO postgres;
+ALTER TABLE public."Processing_Status" OWNER TO postgres;
+GRANT ALL ON TABLE public."Processing_Status" TO postgres;
 
 
--- public.модератор definition
+-- public."Sport_Types" definition
 
 -- Drop table
 
--- DROP TABLE public.модератор;
+-- DROP TABLE public."Sport_Types";
 
-CREATE TABLE public.модератор (
-	"IDмодератор" int4 NOT NULL,
-	фио varchar NULL,
-	CONSTRAINT модератор_pk PRIMARY KEY ("IDмодератор")
+CREATE TABLE public."Sport_Types" (
+	"Sport_Type" varchar NOT NULL,
+	"IDsport_type" int4 NOT NULL,
+	CONSTRAINT sport_type_pk PRIMARY KEY ("IDsport_type")
 );
 
 -- Permissions
 
-ALTER TABLE public.модератор OWNER TO postgres;
-GRANT ALL ON TABLE public.модератор TO postgres;
+ALTER TABLE public."Sport_Types" OWNER TO postgres;
+GRANT ALL ON TABLE public."Sport_Types" TO postgres;
 
 
--- public.участник definition
+-- public."User" definition
 
 -- Drop table
 
--- DROP TABLE public.участник;
+-- DROP TABLE public."User";
 
-CREATE TABLE public.участник (
-	"IDучастник" int4 NOT NULL,
-	"ФИО" varchar NULL,
-	"Спортсмен?" bool NULL,
-	"Менеджер?" bool NULL,
-	CONSTRAINT участник_pk PRIMARY KEY ("IDучастник")
+CREATE TABLE public."User" (
+	"IDuser" int4 NOT NULL,
+	"Full_Name" varchar NULL,
+	"IsSportsman" bool NULL,
+	"IsManager" bool NULL,
+	CONSTRAINT "User_pk" PRIMARY KEY ("IDuser")
 );
 
 -- Permissions
 
-ALTER TABLE public.участник OWNER TO postgres;
-GRANT ALL ON TABLE public.участник TO postgres;
+ALTER TABLE public."User" OWNER TO postgres;
+GRANT ALL ON TABLE public."User" TO postgres;
 
 
--- public.мероприятие definition
+-- public."Users_Sport_Types" definition
 
 -- Drop table
 
--- DROP TABLE public.мероприятие;
+-- DROP TABLE public."Users_Sport_Types";
 
-CREATE TABLE public.мероприятие (
-	"IDмероприятие" int4 NOT NULL,
-	"IDменеджер" int4 NOT NULL,
-	"IDвид_спорта" int4 NOT NULL,
-	дата varchar NULL,
-	время varchar NULL,
-	место varchar NULL,
-	комментарий varchar NULL,
-	CONSTRAINT мероприятие_pk PRIMARY KEY ("IDмероприятие"),
-	CONSTRAINT мероприятие_менеджер_fk FOREIGN KEY ("IDменеджер") REFERENCES public.участник("IDучастник")
+CREATE TABLE public."Users_Sport_Types" (
+	"IDuser" int4 NOT NULL,
+	"IDsport_type" int4 NOT NULL
 );
 
 -- Permissions
 
-ALTER TABLE public.мероприятие OWNER TO postgres;
-GRANT ALL ON TABLE public.мероприятие TO postgres;
+ALTER TABLE public."Users_Sport_Types" OWNER TO postgres;
+GRANT ALL ON TABLE public."Users_Sport_Types" TO postgres;
 
 
--- public.отзыв definition
+-- public."Event" definition
 
 -- Drop table
 
--- DROP TABLE public.отзыв;
+-- DROP TABLE public."Event";
 
-CREATE TABLE public.отзыв (
-	"IDполучатель" int4 NOT NULL,
-	"IDотправитель" int4 NOT NULL,
-	оценка int4 NOT NULL,
-	комментарий varchar NULL,
-	reply varchar NULL,
-	"Активный?" bool NOT NULL DEFAULT true,
-	"IDотзыв" int4 NOT NULL,
-	CONSTRAINT отзыв_pk PRIMARY KEY ("IDотзыв"),
-	CONSTRAINT отзыв_отправитель_fk FOREIGN KEY ("IDотправитель") REFERENCES public.участник("IDучастник"),
-	CONSTRAINT отзыв_получатель_fk FOREIGN KEY ("IDполучатель") REFERENCES public.участник("IDучастник")
+CREATE TABLE public."Event" (
+	"IDevent" int4 NOT NULL,
+	"IDmanager" int4 NOT NULL,
+	"IDsport_type" int4 NOT NULL,
+	"Date" varchar NULL,
+	"Time" varchar NULL,
+	"Address" varchar NULL,
+	"Comment" varchar NULL,
+	"isClosed" bool NULL DEFAULT false,
+	CONSTRAINT event_pk PRIMARY KEY ("IDevent"),
+	CONSTRAINT event_manager_fk FOREIGN KEY ("IDmanager") REFERENCES public."User"("IDuser")
 );
 
 -- Permissions
 
-ALTER TABLE public.отзыв OWNER TO postgres;
-GRANT ALL ON TABLE public.отзыв TO postgres;
+ALTER TABLE public."Event" OWNER TO postgres;
+GRANT ALL ON TABLE public."Event" TO postgres;
 
 
--- public.жалоба definition
+-- public."Review" definition
 
 -- Drop table
 
--- DROP TABLE public.жалоба;
+-- DROP TABLE public."Review";
 
-CREATE TABLE public.жалоба (
-	"IDжалоба" int4 NOT NULL,
-	"IDмодератор" int4 NULL,
-	"Обработана?" bool NOT NULL DEFAULT false,
-	"Удовлетворена?" bool NOT NULL DEFAULT false,
-	"IDотзыв" int4 NULL,
-	CONSTRAINT жалоба_pk PRIMARY KEY ("IDжалоба"),
-	CONSTRAINT жалоба_модератор_fk FOREIGN KEY ("IDмодератор") REFERENCES public.модератор("IDмодератор"),
-	CONSTRAINT жалоба_отзыв_fk FOREIGN KEY ("IDотзыв") REFERENCES public.отзыв("IDотзыв")
+CREATE TABLE public."Review" (
+	"IDreceiver" int4 NOT NULL,
+	"IDsender" int4 NOT NULL,
+	"Mark" int4 NOT NULL,
+	"Comment" varchar NULL,
+	"Reply" varchar NULL,
+	"IsActive" bool NOT NULL DEFAULT true,
+	"IDreview" int4 NOT NULL,
+	"IDevent" int4 NULL,
+	CONSTRAINT "Review_pk" PRIMARY KEY ("IDreview"),
+	CONSTRAINT "Review_Receiver_fk" FOREIGN KEY ("IDreceiver") REFERENCES public."User"("IDuser"),
+	CONSTRAINT "Review_Sender_fk" FOREIGN KEY ("IDsender") REFERENCES public."User"("IDuser"),
+	CONSTRAINT review_event_fk FOREIGN KEY ("IDevent") REFERENCES public."Event"("IDevent")
 );
 
 -- Permissions
 
-ALTER TABLE public.жалоба OWNER TO postgres;
-GRANT ALL ON TABLE public.жалоба TO postgres;
+ALTER TABLE public."Review" OWNER TO postgres;
+GRANT ALL ON TABLE public."Review" TO postgres;
 
 
--- public.заявка definition
+-- public."Application" definition
 
 -- Drop table
 
--- DROP TABLE public.заявка;
+-- DROP TABLE public."Application";
 
-CREATE TABLE public.заявка (
-	"IDмероприятие" int4 NULL,
-	"IDзаявка" int4 NOT NULL,
-	"Одобрена?" bool NULL DEFAULT false,
-	"IDспортсмен" int4 NULL,
-	CONSTRAINT заявка_pk PRIMARY KEY ("IDзаявка"),
-	CONSTRAINT заявка_меро_fk FOREIGN KEY ("IDмероприятие") REFERENCES public.мероприятие("IDмероприятие"),
-	CONSTRAINT заявка_спортсмен_fk FOREIGN KEY ("IDспортсмен") REFERENCES public.участник("IDучастник")
+CREATE TABLE public."Application" (
+	"IDevent" int4 NULL,
+	"IDapplication" int4 NOT NULL,
+	"IDsportsman" int4 NULL,
+	"IDstatus" int4 NULL DEFAULT '-1'::integer,
+	"Comment" varchar NULL,
+	CONSTRAINT apllication_pk PRIMARY KEY ("IDapplication"),
+	CONSTRAINT application_event_fk FOREIGN KEY ("IDevent") REFERENCES public."Event"("IDevent"),
+	CONSTRAINT application_sportsman_fk FOREIGN KEY ("IDsportsman") REFERENCES public."User"("IDuser"),
+	CONSTRAINT application_status_fk FOREIGN KEY ("IDstatus") REFERENCES public."Processing_Status"("IDstatus")
 );
 
 -- Permissions
 
-ALTER TABLE public.заявка OWNER TO postgres;
-GRANT ALL ON TABLE public.заявка TO postgres;
+ALTER TABLE public."Application" OWNER TO postgres;
+GRANT ALL ON TABLE public."Application" TO postgres;
+
+
+-- public."Complaint" definition
+
+-- Drop table
+
+-- DROP TABLE public."Complaint";
+
+CREATE TABLE public."Complaint" (
+	"IDcomplaint" int4 NOT NULL,
+	"IDmoderator" int4 NULL,
+	"IDreview" int4 NULL,
+	"IDstatus" int4 NULL DEFAULT '-1'::integer,
+	"comment" varchar NULL,
+	CONSTRAINT "Complaint_pk" PRIMARY KEY ("IDcomplaint"),
+	CONSTRAINT "Complaint_Moderator_fk" FOREIGN KEY ("IDmoderator") REFERENCES public."Moderator"("IDmoderator"),
+	CONSTRAINT "Complaint_Review_fk" FOREIGN KEY ("IDreview") REFERENCES public."Review"("IDreview"),
+	CONSTRAINT complaint_status_fk FOREIGN KEY ("IDstatus") REFERENCES public."Processing_Status"("IDstatus")
+);
+
+-- Permissions
+
+ALTER TABLE public."Complaint" OWNER TO postgres;
+GRANT ALL ON TABLE public."Complaint" TO postgres;
 
 
 

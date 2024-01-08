@@ -1,6 +1,6 @@
--- active reports on Guardiola
+-- active reports on Mbappe
 
-select "IDreceiver" as "Receiver", "IDsender" as "Sender", "Mark", "Comment", "Reply"
+select "IDreceiver" as "Receiver", "IDsender" as "Sender", "Mark", "Comment", "Reply", "IDevent" 
 from "Review"
-where "Review"."IDreceiver" = 4
+where "Review"."IDreceiver" = 1
 and "IsActive" = true
