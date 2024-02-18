@@ -1,0 +1,199 @@
+---
+openapi: 3.0.0
+info:
+  title: home-iot-api
+  description: The API for the EatBacon IOT project
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/VADICURE/mini-project/1.0.0
+  description: SwaggerHub API Auto Mocking
+paths:
+  /sign_up:
+    post:
+      tags:
+      - authorization
+      parameters:
+      - name: login
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: email
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /sign_in:
+    post:
+      tags:
+      - authentification
+      parameters:
+      - name: login
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /sign_out:
+    post:
+      tags:
+      - authentification
+      parameters:
+      - name: login
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: session_token
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /recovery_password_request:
+    post:
+      tags:
+      - recovery
+      parameters:
+      - name: email
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          format: uiid
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          default: 200
+        message:
+          type: string
+          example: everything is ok
+    ErrorMessage:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          description: HTTP_RESPONSE_CODE
+          default: 401
+          enum:
+          - 400
+          - 401
+          - 404
+          - 500
+        message:
+          type: string
+          description: HTTP_RESPONSE_MESSAGE
+          default: INVALID_PASSWORD
+          enum:
+          - INVALID_PASSWORD
+          - INVALID_LOGIN
+          - SESSION_INPOSSIBLE
+          - INTERNAl_SERVER_ERROR
+    SessionResponse:
+      type: object
+      properties:
+        session_token:
+          type: integer
+          example: 21286
+    AuthRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          example: student
+        temp_hash:
+          type: string
+          description: temporal password hash
+    AuthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+        error:
+          $ref: '#/components/schemas/ErrorMessage'
+    RecoveryPasswordResponse:
+      type: object
+      properties:
+        recovery-token:
+          type: string
