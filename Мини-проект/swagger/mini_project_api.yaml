@@ -12,28 +12,11 @@ paths:
     post:
       tags:
       - authorization
-      parameters:
-      - name: login
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: password
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: email
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizeRequest'
       responses:
         "200":
           description: Status of the operation
@@ -51,21 +34,11 @@ paths:
     post:
       tags:
       - authentification
-      parameters:
-      - name: login
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: password
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
       responses:
         "200":
           description: Status of the operation
@@ -80,7 +53,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
   /sign_out:
-    post:
+    get:
       tags:
       - authentification
       parameters:
@@ -105,12 +78,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /recovery_password_request:
-    post:
+      security:
+      - bearerAuth: []
+  /recovery/password_request:
+    get:
       tags:
       - recovery
       parameters:
-      - name: email
+      - name: recovery_token
         in: query
         required: false
         style: form
@@ -118,6 +93,7 @@ paths:
         schema:
           type: string
           format: uiid
+          example: 31416000-0000-0000-0000-000000000000
       responses:
         "200":
           description: Status of the operation
@@ -131,6 +107,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
+  /recovery/email_request:
+    get:
+      tags:
+      - recovery
+      description: Request for email with recovery link
+      parameters:
+      - name: email
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: mail@mail.ru
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /recovery/confirm_new_password:
+    post:
+      tags:
+      - recovery
+      parameters:
+      - name: password
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status of the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        "401":
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      security:
+      - bearerAuth: []
 components:
   schemas:
     ApiResponse:
@@ -161,27 +191,40 @@ components:
         message:
           type: string
           description: HTTP_RESPONSE_MESSAGE
-          default: INVALID_PASSWORD
+          default: INVALID_PASSWORD_OR_LOGIN
           enum:
           - INVALID_PASSWORD
           - INVALID_LOGIN
+          - INVALID_PASSWORD_OR_LOGIN
           - SESSION_INPOSSIBLE
           - INTERNAl_SERVER_ERROR
     SessionResponse:
       type: object
       properties:
         session_token:
-          type: integer
-          example: 21286
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhVSSBTT0JBQ0hJWSIsImlhdCI6MTUxNjIzOTAyMn0.ppY4cEzYNDzcy3K2CKTf9BuyCwZid9lWRwTH-qJQvkI
     AuthRequest:
       type: object
       properties:
-        login:
+        email:
           type: string
           example: student
-        temp_hash:
+        password:
           type: string
-          description: temporal password hash
+          description: user`s password
+          example: Pa$$w0rd
+    AuthorizeRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          description: user`s password
+          example: Pa$$w0rd
+        email:
+          type: string
+          description: user`s email
+          example: mail@mail.ru
     AuthResponse:
       type: object
       properties:
@@ -197,3 +240,8 @@ components:
       properties:
         recovery-token:
           type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
